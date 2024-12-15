@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shape Preview and Apply</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            height: 100vh;
+            width: 100%;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+            background-color: white;
+        }
+        #preview-box {
+            width: 100%;
+            height: 300px;
+            border: 2px solid #ccc;
+            border-radius: 10px;
+            background-color: #ddd;
+            margin-bottom: 20px;
+        }
+        .button-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            gap: 12px;
+        }
+        #shuffleButton {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex: 0 0 auto;
+            background: #000000;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        #applyButton {
+            flex: 1;
+            height: 40px;
+            padding: 0 16px;
+            border-radius: 8px;
+            background: #000000;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: background-color 0.2s;
+        }
+        #shuffleButton:hover,
+        #applyButton:hover {
+            background-color: #333333;
+        }
+        .dropdown {
+            width: 100%;
+            margin-bottom: 20px;
+            padding: 12px 16px;
+            border: 1px solid #E6E6E6;
+            border-radius: 8px;
+            background-color: white;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg width='12' height='12' viewBox='0 0 12 12' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M2.5 4.5L6 8L9.5 4.5' stroke='%23999999' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 16px center;
+            font-size: 14px;
+            color: #333333;
+            cursor: pointer;
+        }
+
+        .dropdown:hover {
+            border-color: #CCCCCC;
+        }
+
+        .dropdown:focus {
+            outline: none;
+            border-color: #000000;
+        }
+    </style>
+</head>
+<body>
+
+    <select class="dropdown" id="dropdownId">
+        <option value="typography">Typography</option>
+        <option value="hierarchy">Hierarchy</option>
+        <!-- Add more options as needed -->
+    </select>
+
+    <div id="preview-box">
+        <!-- Content for preview will go here -->
+    </div>
+
+    <div class="button-container">
+        <button id="shuffleButton">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path fill-rule="evenodd" 
+                      clip-rule="evenodd" 
+                      d="M10.7663 9.52375L6.23375 5L5 6.23375L9.52375 10.7575L10.7663 9.52375ZM14.1875 5L15.9725 6.785L5 17.7663L6.23375 19L17.215 8.0275L19 9.8125V5H14.1875ZM13.2425 14.4675L14.4763 13.2337L17.215 15.9725L19 14.1875V19H14.1875L15.9813 17.2062L13.2425 14.4675Z" 
+                      fill="#ffffff">
+                </path>
+            </svg>
+        </button>
+        <button id="applyButton">Apply</button>
+    </div>
+
+    <script>
+        const previewBox = document.getElementById('preview-box');
+        const dropdown = document.getElementById('dropdownId');
+
+        const shapes = {
+            typography: ['star', 'circle', 'triangle'],
+            hierarchy: ['square', 'heart', 'hexagon']
+        };
+
+        let currentShape = ''; // Track the current shape
+
+        function initializeShape() {
+            const selectedSet = dropdown.value;
+            currentShape = shapes[selectedSet][0]; // Start with first shape
+            updatePreview();
+        }
+
+        function updatePreview() {
+            previewBox.innerHTML = `
+                <div style="height: 100%; display: flex; align-items: center; justify-content: center; font-size: 24px;">
+                    ${currentShape.charAt(0).toUpperCase() + currentShape.slice(1)}
+                </div>
+            `;
+        }
+
+        dropdown.addEventListener('change', initializeShape);
+        
+        document.getElementById('shuffleButton').onclick = () => {
+            const selectedSet = dropdown.value;
+            const currentShapes = shapes[selectedSet];
+            const currentIndex = currentShapes.indexOf(currentShape);
+            // Move to next shape, or back to first if at end
+            const nextIndex = (currentIndex + 1) % currentShapes.length;
+            currentShape = currentShapes[nextIndex];
+            updatePreview();
+        };
+
+        document.getElementById('applyButton').onclick = () => {
+            console.log("Dropdown value in UI:", dropdown.value);
+            console.log("Current shape in UI:", currentShape);
+
+            parent.postMessage({
+                pluginMessage: {
+                    type: 'apply-shape',
+                    dropdown: dropdown.value,
+                    shape: currentShape
+                }
+            }, '*');
+        };
+
+        initializeShape(); // Initialize with first shape
+    </script>
+
+</body>
+</html>
